@@ -1,0 +1,88 @@
+spring:
+  application:
+    name: loans-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/loans_db
+    username: loans_user
+    password: loans_password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      pool-name: LoansHikariPool
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+          order_inserts: true
+          order_updates: true
+  cache:
+    type: simple
+    cache-names: loans, loanDetails
+    redis:
+      time-to-live: 300000
+      enable-statistics: true
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 16
+        max-idle: 8
+        min-idle: 2
+        max-wait: 1000ms
+
+memcached:
+  servers: localhost:11211
+  protocol: binary
+  op-timeout: 5000
+  connection-factory-class: net.spy.memcached.DefaultConnectionFactory
+  cache-ttl-seconds: 300
+  default-cache-strategy: fallback
+
+cache:
+  default-ttl-seconds: 300
+  strategies:
+    - name: redis-primary
+      primary: true
+      fallback: memcached
+    - name: memcached-fallback
+      primary: false
+      fallback: none
+
+logging:
+  level:
+    root: INFO
+    com.bank.loans: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/loans-service.log
+    max-size: 10MB
+    max-history: 7
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/loans
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 20000ms
+    max-connections: 8192
+    accept-count: 100
